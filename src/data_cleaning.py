@@ -9,9 +9,9 @@ class DataCleaner(object):
 
     def _read_data(self):
         if self._train_test=='train':
-            self._data = pd.read_csv('/Users/stefanobrunelli/kaggle/sberbank_russian_housing_market//data/train.csv')
+            self._data = pd.read_csv('/Users/stefanobrunelli/github/russian_housing_market/data/train.csv')
         else:
-            self._data = pd.read_csv('/Users/stefanobrunelli/kaggle/sberbank_russian_housing_market//data/test.csv')
+            self._data = pd.read_csv('/Users/stefanobrunelli/github/russian_housing_market/data/test.csv')
 
     def clean(self):
         self._read_data()

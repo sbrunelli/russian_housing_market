@@ -22,7 +22,7 @@ def main():
     tmstmp = datetime.now().strftime("%Y%m%d_%H%M%S")
     house_ids = featurizer_test.get_house_ids()
     kaggle = pd.DataFrame({'id': house_ids, 'price_doc': y_predicted})
-    kaggle.to_csv('/Users/stefanobrunelli/kaggle/sberbank_russian_housing_market/predictions/predictions'+tmstmp+'.csv'
+    kaggle.to_csv('/Users/stefanobrunelli/github/russian_housing_market/predictions/predictions'+tmstmp+'.csv'
         , index=False)
 
 if __name__ == "__main__":

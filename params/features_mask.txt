@@ -1,3 +1,4 @@
 full_sq
-full_all
-green_zone_part
+life_sq
+sub_area
+price_doc
