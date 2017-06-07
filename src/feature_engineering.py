@@ -66,12 +66,5 @@ class Featurizer(object):
         self._code_flags_as_10('radiation_raion')
         self._code_flags_as_10('big_market_raion')
         self._create_missing_flag('num_room')
-#        self._impute_nas_with_mean_by_category('life_sq', 'sub_area')
-#        self._impute_nas_with_mean('life_sq')
-#        self._convert_to_categorical('material')
-#        self._impute_nas_with_mode_by_category('material', 'sub_area')
         self._impute_nas_with_mode('num_room')
-#        self._dummify('sub_area')
-#        self._X.pop('sub_area')
-        # self._create_design_matrix_y_split()
         return self._X.values

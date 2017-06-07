@@ -38,6 +38,7 @@ if __name__ == "__main__":
 
     # Score all estimators with best parameters against test data set
     ms.score_best_estimators(X_test, y_test)
+    ms.report_score_best_estimators()
 
     # Select best estimator
     best_estimator = ms.get_best_estimator()
