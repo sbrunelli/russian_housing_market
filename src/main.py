@@ -2,11 +2,13 @@ import pandas as pd
 from feature_engineering import Featurizer
 from model_selection import ModelSelector
 from datetime import datetime
+from sklearn.model_selection import train_test_split
 
 def main():
     # Prepare data
     featurizer_train = Featurizer(train_test='train')
-    X_train, y_train = featurizer_train.featurize()
+    X, y = featurizer_train.featurize()
+    # X_train, X_test, y_train, y_test = train_test_split(X, y)
 
     # Train model
     ms = ModelSelector()
@@ -27,3 +29,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+from feature_engineering import Featurizer
+f_train = Featurizer(train_test='train')
+X_train, y_train = f_train.featurize()
+f_test = Featurizer(train_test='test')
+X_test, y_test = f_test.featurize()
