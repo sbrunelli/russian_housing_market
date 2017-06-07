@@ -1,39 +1,69 @@
 import pandas as pd
+import numpy as np
+from data_cleaning import DataCleaner
 from feature_engineering import Featurizer
 from model_selection import ModelSelector
 from datetime import datetime
 from sklearn.model_selection import train_test_split
 
-def main():
-    # Prepare data
-    featurizer_train = Featurizer(train_test='train')
-    X, y = featurizer_train.featurize()
-    # X_train, X_test, y_train, y_test = train_test_split(X, y)
+if __name__ == "__main__":
+    # Turn off warnings
+    pd.options.mode.chained_assignment = None
 
-    # Train model
+    # Read train data set
+    train = pd.read_csv('/Users/stefanobrunelli/github/russian_housing_market/data/train.csv')
+
+    # Clean
+    dc = DataCleaner(train)
+    X, y = dc.clean()
+    y = np.array(y)
+
+    # Train / test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+    # Featurize training data set
+    feat_train = Featurizer()
+    X_train = feat_train.featurize(X_train)
+
+    # Grid search tune all estimators
     ms = ModelSelector()
-    ms.fit(X_train, y_train)
-    predictor = ms.best_predictor()
+    ms.grid_search_cv(X_train, y_train)
 
-    # Predict test data
-    featurizer_test = Featurizer(train_test='test')
-    X_test, _ = featurizer_test.featurize()
-    y_predicted = predictor.predict(X_test)
+    # Retrain estimators with best parameters
+    ms.retrain_with_best_params()
 
-    # Create prediction file for Kaggle submission
+    # Featurize test data set
+    feat_test = Featurizer()
+    X_test = feat_test.featurize(X_test)
+
+    # Score all estimators with best parameters against test data set
+    ms.score_best_estimators(X_test, y_test)
+
+    # Select best estimator
+    best_estimator = ms.get_best_estimator()
+
+    # Train / test merge
+
+    # Featurize train / test merge
+    featurizer = Featurizer()
+    X = featurizer.featurize(X)
+
+    # Train best estimator against merged train / test
+    best_estimator.fit(X, y)
+
+    # Read Kaggle test set
+    test = pd.read_csv('/Users/stefanobrunelli/github/russian_housing_market/data/test.csv')
+
+    # Featurize Kaggle test set
+    dc_kaggle = DataCleaner(test, train_test='test')
+    test = dc_kaggle.kaggle()
+    feat_kaggle = Featurizer()
+    X_kaggle = feat_kaggle.featurize(test)
+
+    # Create prediction file to submit to Kaggle
     tmstmp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    house_ids = featurizer_test.get_house_ids()
+    house_ids = feat_kaggle.get_house_ids()
+    y_predicted = best_estimator.predict(X_kaggle)
     kaggle = pd.DataFrame({'id': house_ids, 'price_doc': y_predicted})
     kaggle.to_csv('/Users/stefanobrunelli/github/russian_housing_market/predictions/predictions'+tmstmp+'.csv'
         , index=False)
-
-if __name__ == "__main__":
-    main()
-
-
-
-from feature_engineering import Featurizer
-f_train = Featurizer(train_test='train')
-X_train, y_train = f_train.featurize()
-f_test = Featurizer(train_test='test')
-X_test, y_test = f_test.featurize()

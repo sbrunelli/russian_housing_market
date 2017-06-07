@@ -2,17 +2,33 @@ import pandas as pd
 
 class DataCleaner(object):
 
-    def __init__(self, train_test='train'):
-        self._data = None
-        self._macro = None
+    def __init__(self, data, train_test='train'):
+        self._data = data
+        self._features_names = None
         self._train_test = train_test
 
-    def _read_data(self):
-        if self._train_test=='train':
-            self._data = pd.read_csv('/Users/stefanobrunelli/github/russian_housing_market/data/train.csv')
-        else:
-            self._data = pd.read_csv('/Users/stefanobrunelli/github/russian_housing_market/data/test.csv')
+    def _import_features_mask(self):
+        with open('/Users/stefanobrunelli/github/russian_housing_market/params/features_mask.txt') as features_mask:
+            self._features_names = features_mask.read().splitlines()
+        if self._train_test=='test':
+            self._features_names.remove('price_doc')
+
+    def _apply_features_mask(self):
+        self._data = self._data[self._features_names]
+
+    def get_features_mask(self):
+        return self._features_names
 
     def clean(self):
-        self._read_data()
-        return (self._data)
+        self._import_features_mask()
+        self._apply_features_mask()
+        if self._train_test=='train':
+            y = self._data.pop('price_doc')
+        X = self._data
+        return (X, y)
+
+    def kaggle(self):
+        self._import_features_mask()
+        self._apply_features_mask()
+        X = self._data
+        return X

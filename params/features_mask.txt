@@ -1,3 +1,4 @@
+id
 price_doc
 full_sq
 num_room
