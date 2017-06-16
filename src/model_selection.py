@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 from feature_engineering import Featurizer
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.linear_model import Ridge
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor
+from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
 from collections import defaultdict
 from datetime import datetime
@@ -11,15 +13,30 @@ class ModelSelector(object):
     def __init__(self):
         self._X_train = None
         self._y_train = None
-        self._estimators = [RandomForestRegressor(n_jobs=-1),
-                            GradientBoostingRegressor()
+        self._estimators = [
+                            # RandomForestRegressor(),
+                            GradientBoostingRegressor(),
+                            AdaBoostRegressor()#,
+                            # SVR()
                             ]
         self._best_estimator_index = None
         self._scores = np.repeat(0., len(self._estimators))
-        self._parameters_grid = {'RandomForestRegressor':
-                                    {'n_estimators': [100, 200]},
+        self._parameters_grid = {
+                                # 'RandomForestRegressor':
+                                    # {'n_estimators': [1000]},
                                 'GradientBoostingRegressor':
-                                    {'n_estimators': [100, 200]}}
+                                    {'n_estimators': [2000, 3000],
+                                    'learning_rate': [0.1, 0.01],
+                                    'subsample': [1, 0.9, 0.8],
+                                    'max_depth': [1, 3]},
+                                'AdaBoostRegressor':
+                                    {'n_estimators': [2000, 3000],
+                                    'learning_rate': [0.1, 0.01]}
+                                # 'SVR':
+                                #     {'kernel': ['rbf'],
+                                #     'C': [1e0, 1e1, 1e2, 1e3],
+                                #     'gamma': np.logspace(-2, 2, 5)}
+                                }
         self._grid_search_results = defaultdict()
         self._best_retrained = False
 
@@ -32,28 +49,31 @@ class ModelSelector(object):
     def grid_search_cv(self, X_train, y_train):
         self._X_train = X_train
         self._y_train = y_train
-        print '\n\n'
         for estimator in self._estimators:
             estimator_name = self._get_estimator_name(estimator)
             print ' # {:s} | Grid searching for estimator: {:s}'.format(self._now(), estimator_name)
             parameters = self._parameters_grid[estimator_name]
             gs = GridSearchCV(estimator, parameters, cv=3)
-            gs.fit(X_train, y_train)
+            # gs.fit(X_train, y_train)
+            gs.fit(X_train, np.log(y_train))
             self._grid_search_results[estimator_name] = gs
 
     def retrain_with_best_params(self):
         for estimator in self._estimators:
             estimator_name = self._get_estimator_name(estimator)
             best_parameters = self._grid_search_results[estimator_name].best_params_
-            print '\n # {:s} | Retraining estimator: {:s}'.format(self._now(), estimator_name)
+            print ' # {:s} | Retraining estimator: {:s}'.format(self._now(), estimator_name)
             print ' # {:s} | Best parameters: {:s}'.format(self._now(), best_parameters)
             estimator.set_params(**best_parameters)
             print estimator
+            # estimator.fit(self._X_train, self._y_train)
             estimator.fit(self._X_train, self._y_train)
         self._best_retrained = True
 
     def _rmlse(self, estimator, X_test, y_test):
-        y_predicted = estimator.predict(X_test)
+        # y_predicted = estimator.predict(X_test)
+        y_predicted = np.exp(estimator.predict(X_test)) - 1
+        y_test = np.exp(y_test) - 1
         score = np.sqrt(np.sum((np.log(y_predicted+1) - np.log(y_test+1))**2) / len(y_predicted))
         return score
 
@@ -81,6 +101,6 @@ class ModelSelector(object):
         if not self._best_estimator_index:
             self._set_best_estimator_index()
         estimator_name = self._get_estimator_name(self._estimators[self._best_estimator_index])
-        print '\n # {:s} | Best estimator: {:s}'.format(self._now(), estimator_name)
+        print ' # {:s} | Best estimator: {:s}'.format(self._now(), estimator_name)
         print self._estimators[self._best_estimator_index]
         return self._estimators[self._best_estimator_index]
