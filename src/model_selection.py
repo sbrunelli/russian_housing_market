@@ -15,23 +15,38 @@ class ModelSelector(object):
         self._y_train = None
         self._estimators = [
                             # RandomForestRegressor(),
-                            GradientBoostingRegressor(),
-                            AdaBoostRegressor()#,
+                            GradientBoostingRegressor()#,
+                            # AdaBoostRegressor()#,
                             # SVR()
                             ]
         self._best_estimator_index = None
         self._scores = np.repeat(0., len(self._estimators))
+        # self._parameters_grid = {
+        #                         # 'RandomForestRegressor':
+        #                         #     {'n_estimators': [2000]},
+        #                         'GradientBoostingRegressor':
+        #                             {'n_estimators': [50000, 100000],
+        #                             'learning_rate': [0.001, 0.00001],
+        #                             # 'subsample': [1, 0.75],
+        #                             'max_depth': [1, 2]}#,
+        #                         # 'AdaBoostRegressor':
+        #                         #     {'n_estimators': [2000, 3000],
+        #                         #     'learning_rate': [0.1, 0.01]}
+        #                         # 'SVR':
+        #                         #     {'kernel': ['rbf'],
+        #                         #     'C': [1e0, 1e1, 1e2, 1e3],
+        #                         #     'gamma': np.logspace(-2, 2, 5)}
+        #                         }
         self._parameters_grid = {
                                 # 'RandomForestRegressor':
-                                    # {'n_estimators': [1000]},
+                                #     {'n_estimators': [2000]},
                                 'GradientBoostingRegressor':
-                                    {'n_estimators': [2000, 3000],
-                                    'learning_rate': [0.1, 0.01],
-                                    'subsample': [1, 0.9, 0.8],
-                                    'max_depth': [1, 3]},
-                                'AdaBoostRegressor':
-                                    {'n_estimators': [2000, 3000],
-                                    'learning_rate': [0.1, 0.01]}
+                                    {'n_estimators': [100],
+                                    'learning_rate': [0.01],
+                                    'max_depth': [1]}#,
+                                # 'AdaBoostRegressor':
+                                #     {'n_estimators': [2000, 3000],
+                                #     'learning_rate': [0.1, 0.01]}
                                 # 'SVR':
                                 #     {'kernel': ['rbf'],
                                 #     'C': [1e0, 1e1, 1e2, 1e3],
@@ -53,7 +68,7 @@ class ModelSelector(object):
             estimator_name = self._get_estimator_name(estimator)
             print ' # {:s} | Grid searching for estimator: {:s}'.format(self._now(), estimator_name)
             parameters = self._parameters_grid[estimator_name]
-            gs = GridSearchCV(estimator, parameters, cv=3)
+            gs = GridSearchCV(estimator, parameters, cv=5)
             # gs.fit(X_train, y_train)
             gs.fit(X_train, np.log(y_train))
             self._grid_search_results[estimator_name] = gs

@@ -50,14 +50,21 @@ class DataCleaner(object):
         return data, y
 
     def _clean_full_sq(self):
-        mask = ~(self._data.full_sq > 1000).values
+        # mask = ~(self._data.full_sq > 1000).values
+        # self._data = self._data[mask]
+        # mask = ~((self._data.full_sq == 1.0) & (self._data.life_sq == 1.0)).values
+        # self._data = self._data[mask]
+        # mask = ~((self._data.full_sq == 0.0) & (self._data.life_sq == 0.0)).values
+        # self._data = self._data[mask]
+        # mask = (self._data.full_sq <= 1.0).values
+        # self._data.loc[mask, 'full_sq'] = self._data.loc[mask, 'life_sq']
+        full_sq_mean = self._data.full_sq.mean()
+        full_sq_std = self._data.full_sq.std()
+        full_sq_z = self._data.full_sq.map(lambda x: (x-full_sq_mean)/full_sq_std)
+        mask = abs(full_sq_z) <= 10.0
         self._data = self._data[mask]
-        mask = ~((self._data.full_sq == 1.0) & (self._data.life_sq == 1.0)).values
+        mask = ~(self._data.full_sq <= 1.0)
         self._data = self._data[mask]
-        mask = ~((self._data.full_sq == 0.0) & (self._data.life_sq == 0.0)).values
-        self._data = self._data[mask]
-        mask = (self._data.full_sq <= 1.0).values
-        self._data.loc[mask, 'full_sq'] = self._data.loc[mask, 'life_sq']
         mask = ~(self._data.full_sq < self._data.life_sq)
         self._data = self._data[mask]
 
@@ -71,5 +78,5 @@ class DataCleaner(object):
 
     def kaggle(self):
         self._clean_build_year()
-        self._clean_full_sq()
+        # self._clean_full_sq()
         return self._data
