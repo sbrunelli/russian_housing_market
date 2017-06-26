@@ -21,28 +21,13 @@ class ModelSelector(object):
                             ]
         self._best_estimator_index = None
         self._scores = np.repeat(0., len(self._estimators))
-        # self._parameters_grid = {
-        #                         # 'RandomForestRegressor':
-        #                         #     {'n_estimators': [2000]},
-        #                         'GradientBoostingRegressor':
-        #                             {'n_estimators': [50000, 100000],
-        #                             'learning_rate': [0.001, 0.00001],
-        #                             # 'subsample': [1, 0.75],
-        #                             'max_depth': [1, 2]}#,
-        #                         # 'AdaBoostRegressor':
-        #                         #     {'n_estimators': [2000, 3000],
-        #                         #     'learning_rate': [0.1, 0.01]}
-        #                         # 'SVR':
-        #                         #     {'kernel': ['rbf'],
-        #                         #     'C': [1e0, 1e1, 1e2, 1e3],
-        #                         #     'gamma': np.logspace(-2, 2, 5)}
-        #                         }
         self._parameters_grid = {
                                 # 'RandomForestRegressor':
                                 #     {'n_estimators': [2000]},
                                 'GradientBoostingRegressor':
-                                    {'n_estimators': [100],
-                                    'learning_rate': [0.01],
+                                    {'n_estimators': [50000],
+                                    'learning_rate': [0.001, 0.00001],
+                                    # 'subsample': [1, 0.75],
                                     'max_depth': [1]}#,
                                 # 'AdaBoostRegressor':
                                 #     {'n_estimators': [2000, 3000],
@@ -52,6 +37,21 @@ class ModelSelector(object):
                                 #     'C': [1e0, 1e1, 1e2, 1e3],
                                 #     'gamma': np.logspace(-2, 2, 5)}
                                 }
+        # self._parameters_grid = {
+        #                         # 'RandomForestRegressor':
+        #                         #     {'n_estimators': [2000]},
+        #                         'GradientBoostingRegressor':
+        #                             {'n_estimators': [100],
+        #                             'learning_rate': [0.01],
+        #                             'max_depth': [1]}#,
+        #                         # 'AdaBoostRegressor':
+        #                         #     {'n_estimators': [2000, 3000],
+        #                         #     'learning_rate': [0.1, 0.01]}
+        #                         # 'SVR':
+        #                         #     {'kernel': ['rbf'],
+        #                         #     'C': [1e0, 1e1, 1e2, 1e3],
+        #                         #     'gamma': np.logspace(-2, 2, 5)}
+        #                         }
         self._grid_search_results = defaultdict()
         self._best_retrained = False
 

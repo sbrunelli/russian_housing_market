@@ -68,7 +68,6 @@ class Featurizer(object):
     def _parse_timestamp(self):
         self._X['year'] = self._X.timestamp.dt.year
         self._X['month'] = self._X.timestamp.dt.month
-        self._X['dow'] = self._X.timestamp.dt.dayofweek
 
         # Adding counts
         # Add month-year
@@ -87,9 +86,9 @@ class Featurizer(object):
 
     def _attach_main_section(self):
         variables = ['full_sq', 'life_sq', 'kitch_sq', 'num_room', 'state', 'zd_vokzaly_avto_km', 'nuclear_reactor_km', 'university_km', 'office_km', 'office_sqm_5000', 'trc_count_5000',
-        'cafe_count_5000_price_1000', 'sport_count_5000', 'sadovoe_km', 'build_year', 'sub_area', 'timestamp',
-        'floor', 'school_education_centers_raion', 'leisure_count_5000', 'deposits_value', 'salary']#,
-        # 'longitude', 'latitude']
+        'cafe_count_5000_price_1000', 'sport_count_5000', 'sadovoe_km', 'build_year',  'timestamp',
+        'floor', 'school_education_centers_raion', 'leisure_count_5000', 'deposits_value', 'salary',
+        'longitude', 'latitude']
 
         self._X = pd.concat([self._X, self._data[variables]], axis=1)
 
@@ -252,6 +251,7 @@ class Featurizer(object):
         y_new = life_sq_imputer.predict(X_new)
         self._X['life_sq_predicted'] = y_new
         self._X['life_sq'] = self._X['life_sq'].combine_first(self._X['life_sq_predicted'])
+        self._X['life_sq'] = self._X.life_sq.map(lambda x: 0 if x<0.0 else x)
         self._X.pop('life_sq_predicted')
 
     def featurize(self, data, train_test='train'):
@@ -262,11 +262,11 @@ class Featurizer(object):
             self._first_pca = True
         self._house_ids = self._data.pop('id')
         self._attach_main_section()
-        self._create_missing_flag('num_room')
+        # self._create_missing_flag('num_room')
         self._create_missing_flag('state')
-        self._create_missing_flag('kitch_sq')
+        # self._create_missing_flag('kitch_sq')
         self._create_missing_flag('life_sq')
-        self._create_missing_flag('floor')
+        # self._create_missing_flag('floor')
         self._create_missing_flag('salary')
         self._create_missing_flag('build_year')
         self._X['floor'] = self._X.floor.fillna(0.0)
@@ -275,17 +275,17 @@ class Featurizer(object):
         self._impute_nas_with_mode('state')
         self._impute_nas_with_mode('build_year')
         self._impute_nas_with_median('kitch_sq')
-        self._impute_nas_with_median('life_sq')
+        # self._impute_nas_with_median('life_sq')
         self._impute_nas_life_sq()
         self._impute_nas_with_median('salary')
         self._create_sq_per_room()
         self._create_extra_sq()
-        self._dummify('sub_area')
+        # self._dummify('sub_area')
         # # self._pca_feature_extraction('general')
         self._create_ratios(baseline='full_sq', features=['life_sq', 'kitch_sq'])
         self._create_cafe_avg_price_index()
         self._create_cafe_density_index()
         self._create_cafe_under_over_price_share()
-        # self._X.pop('life_sq')
+        self._X.pop('life_sq')
         self._parse_timestamp()
         return self._X.values

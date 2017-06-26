@@ -1,0 +1,32 @@
+Next steps
+
+
+1. Add signal:
+
+  1.1 life_sq   => very high collinearity, can see the effects of LR and RF
+
+  1.2 num_room  => also collinear, but not quite as much
+
+
+Notes: both variables have NAs.
+
+* do they have NAs in the test dataset too?
+
+* if yes, than it might be ok to impute both training and validation, otherwise we might want to impute the training data set and drop the NAs from my validation set.
+
+
+Roadmap
+-------
+
+1. Look at num_room NAs in test set (kaggle test set)
+
+2. Act upon results of point 1. as far as NAs in validation set are concerned
+
+3. Impute NAs
+
+4. Run ModelSelector
+
+5. In the final plot: color code a 3rd dimension in the data, for example year of transaction, so that I can visually see if the missing raise in prices could be due to not considering time in the models. Do that for other dimensions you might think could be important, for example sub_area, but others too.
+
+Point 5 is of the highest importance and I should dedicate time to it.
+Look at model's results (maybe separately for lr and rf or maybe just for rf), and try to see where the models are still weak is precondition to be able to improve them then.

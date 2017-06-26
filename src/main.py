@@ -17,6 +17,7 @@ if __name__ == "__main__":
 
     # Read data sets
     train = pd.read_csv('./data/train.csv', parse_dates=['timestamp'])
+    train = train[train.timestamp.dt.year >= 2014]
     test = pd.read_csv('./data/test.csv', parse_dates=['timestamp'])
     gps = pd.read_csv('./data/Longitud_Latitud.csv')
     # Create sub_area categorical with all levels shared
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     train = train.merge(macro, how='left', on='timestamp', suffixes=('_train', '_macro'))
 
     # Clean
-    dc = DataCleaner(data=train, sample_rate=0.75)
+    dc = DataCleaner(data=train, sample_rate=0.3)
     data, y = dc.clean()
     y = np.array(y)
     y = np.log(y+1)
@@ -144,41 +145,41 @@ if __name__ == "__main__":
     kaggle.to_csv('predictions/predictions'+tmstmp+'.csv'
         , index=False)
 
-    ########################
-    # DELETE ME
-    ########################
-    import xgboost as xgb
-    dtrain_all = xgb.DMatrix(X, y, feature_names=feat_names)
-    dtrain = xgb.DMatrix(X_train, y_train, feature_names=feat_names)
-    dval = xgb.DMatrix(X_test[:, :(X_test.shape[1]-2)], y_test, feature_names=feat_names)
-    dkaggle = xgb.DMatrix(X_kaggle, feature_names=feat_names)
-
-    xgb_params = {
-        'eta': 0.0001,
-        'max_depth': 3,
-        'subsample': 1,
-        'colsample_bytree': 0.75,
-        'eval_metric': 'rmse',
-        'silent': 1
-    }
-
-    watchlist = [(dval, 'eval'), (dtrain, 'train')]
-
-    num_round=int(1e5)
-
-    partial_model = xgb.train(xgb_params, dtrain, num_round, watchlist, early_stopping_rounds=20)
-
-    num_boost_round = partial_model.best_iteration
-
-    model = xgb.train(xgb_params, dtrain_all, num_round)
-    y_predicted_xgb = model.predict(dkaggle)
-    y_predicted_xgb = np.exp(y_predicted_xgb) - 1
-
-    print '\n # {:s} | Predictions (xgboost)'.format(now())
-    print ' # {:s} | Nr. rows: {:d}'.format(now(), len(y_predicted_xgb))
-    print ' # {:s} | Nr. negative values: {:d}'.format(now(), np.sum(y_predicted_xgb < 0.0))
-    print ' # {:s} | Nr. NA: {:d}'.format(now(), np.sum(np.isnan(y_predicted_xgb)))
-    print ' # {:s} | Nr. Inf: {:d}'.format(now(), np.sum(y_predicted_xgb == np.Inf))
-
-    kaggle_xgb = pd.DataFrame({'id': house_ids, 'price_doc': y_predicted_xgb})
-    kaggle_xgb.to_csv('predictions/predictions_xgb_'+tmstmp+'.csv', index=False)
+    # ########################
+    # # DELETE ME
+    # ########################
+    # import xgboost as xgb
+    # dtrain_all = xgb.DMatrix(X, y, feature_names=feat_names)
+    # dtrain = xgb.DMatrix(X_train, y_train, feature_names=feat_names)
+    # dval = xgb.DMatrix(X_test[:, :(X_test.shape[1]-2)], y_test, feature_names=feat_names)
+    # dkaggle = xgb.DMatrix(X_kaggle, feature_names=feat_names)
+    #
+    # xgb_params = {
+    #     'eta': 0.0001,
+    #     'max_depth': 3,
+    #     'subsample': 1,
+    #     'colsample_bytree': 0.75,
+    #     'eval_metric': 'rmse',
+    #     'silent': 1
+    # }
+    #
+    # watchlist = [(dval, 'eval'), (dtrain, 'train')]
+    #
+    # num_round=int(1e5)
+    #
+    # partial_model = xgb.train(xgb_params, dtrain, num_round, watchlist, early_stopping_rounds=20)
+    #
+    # num_boost_round = partial_model.best_iteration
+    #
+    # model = xgb.train(xgb_params, dtrain_all, num_round)
+    # y_predicted_xgb = model.predict(dkaggle)
+    # y_predicted_xgb = np.exp(y_predicted_xgb) - 1
+    #
+    # print '\n # {:s} | Predictions (xgboost)'.format(now())
+    # print ' # {:s} | Nr. rows: {:d}'.format(now(), len(y_predicted_xgb))
+    # print ' # {:s} | Nr. negative values: {:d}'.format(now(), np.sum(y_predicted_xgb < 0.0))
+    # print ' # {:s} | Nr. NA: {:d}'.format(now(), np.sum(np.isnan(y_predicted_xgb)))
+    # print ' # {:s} | Nr. Inf: {:d}'.format(now(), np.sum(y_predicted_xgb == np.Inf))
+    #
+    # kaggle_xgb = pd.DataFrame({'id': house_ids, 'price_doc': y_predicted_xgb})
+    # kaggle_xgb.to_csv('predictions/predictions_xgb_'+tmstmp+'.csv', index=False)
